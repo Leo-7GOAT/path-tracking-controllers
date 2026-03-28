@@ -219,17 +219,3 @@ python MPC.py --no-live
 | `draw.py` | 小车可视化绘制工具，用于静态图和动画展示 |
 | `assets/readme/` | README 展示图片与 GIF |
 | `outputs/` | benchmark 本地运行输出目录，默认不纳入 GitHub 展示结构 |
-
-## Resume-oriented Summary
-
-> 搭建了一个覆盖几何法、经典反馈法和模型控制法三类思路的轨迹跟踪 benchmark 项目，统一实现并评测 Stanley、Pure Pursuit、PID、LQR、MPC 共 5 类控制器，在直线、高曲率曲线和整圈闭环任务上对横向误差、完成时间、速度误差和控制平滑性进行量化对比，并完成实时演示、GIF 动态展示和图表自动生成。
-
-## Notes
-
-- README 中使用的展示图片位于 `assets/readme/`，适合直接同步到 GitHub 首页展示。
-- `outputs/` 是本地运行产物，每次 benchmark 会自动覆盖旧结果。
-- 如果在 PyCharm 中运行但没有弹出独立窗口，通常是因为开启了 SciView；关闭 `Show plots in tool window` 后再运行即可。
-
-## License
-
-This project is released under the MIT License. See `LICENSE` for details.
