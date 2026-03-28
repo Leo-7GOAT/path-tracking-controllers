@@ -199,6 +199,5 @@ python MPC.py --no-live
 
 ## Notes
 
-- README 中使用的展示图片位于 `assets/readme/`，适合直接同步到 GitHub 首页展示。
 - `outputs/` 是运行产物，每次 benchmark 会自动覆盖旧结果。
 - 如果在 PyCharm 中运行但没有弹出独立窗口，通常是因为开启了 SciView；关闭 `Show plots in tool window` 后再运行即可。
