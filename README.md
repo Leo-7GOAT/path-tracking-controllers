@@ -2,7 +2,16 @@
 
 Comparative benchmark and visualization project for classical vehicle path-tracking controllers in Python.
 
-这是一个面向自动驾驶规控/控制算法岗位展示的轨迹跟踪 benchmark 项目。当前版本已经整理为可独立运行、可复现实验结果、可实时演示的工程化版本，统一实现并对比了 5 类经典路径跟踪方法：
+这是一个面向自动驾驶规控/控制算法岗位展示的轨迹跟踪 benchmark 项目。当前版本已经整理为可独立运行、可复现实验结果、可实时演示的工程化版本。
+
+## At a Glance
+
+- `5` 类控制器：`Stanley / Pure Pursuit / PID / LQR / MPC-style`
+- `3` 类任务：`Straight / Curved / CircleLoop`
+- 支持实时弹窗、多车同图演示、量化评测、自动出图出表
+- 适合作为自动驾驶控制/规控岗位的项目展示与面试讲解材料
+
+统一实现并对比的方法如下：
 
 - `Stanley`
 - `Pure Pursuit`
@@ -201,3 +210,7 @@ python MPC.py --no-live
 
 - `outputs/` 是运行产物，每次 benchmark 会自动覆盖旧结果。
 - 如果在 PyCharm 中运行但没有弹出独立窗口，通常是因为开启了 SciView；关闭 `Show plots in tool window` 后再运行即可。
+
+## License
+
+This project is released under the MIT License. See `LICENSE` for details.
