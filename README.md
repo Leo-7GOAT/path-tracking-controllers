@@ -197,12 +197,6 @@ python MPC.py --no-live
 - `outputs/lqr/`
 - `outputs/mpc/`
 
-## Resume-oriented Summary
-
-如果你想把这个项目写进简历，可以概括成：
-
-> 搭建了一个自包含的轨迹跟踪控制 benchmark，统一实现并评测 Stanley、Pure Pursuit、PID、LQR 和 MPC-style 5 类控制器，在直线、高曲率曲线和整圈闭环任务上对横向误差、完成时间和控制平滑性进行量化对比，并完成实时演示、结果图表自动生成和独立脚本封装。
-
 ## Notes
 
 - README 中使用的展示图片位于 `assets/readme/`，适合直接同步到 GitHub 首页展示。
