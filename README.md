@@ -61,21 +61,31 @@ Comparative benchmark and visualization project for representative vehicle path-
 
 ## Visualization
 
-### Curved Live Demo
+### Straight
+
+![Straight multi-controller live demo](assets/readme/straight_all_controllers.gif)
+
+![Straight multi-controller snapshot](assets/readme/straight_all_controllers.png)
+
+### Curved
 
 ![Curved multi-controller live demo](assets/readme/curved_all_controllers.gif)
 
-### Curved Multi-controller Snapshot
-
 ![Curved multi-controller snapshot](assets/readme/curved_all_controllers.png)
 
-### Trajectory Overview
+### CircleLoop
 
-![Trajectory overview](assets/readme/trajectory_overview.png)
+![CircleLoop multi-controller live demo](assets/readme/circleloop_all_controllers.gif)
+
+![CircleLoop multi-controller snapshot](assets/readme/circleloop_all_controllers.png)
 
 ### Metric Dashboard
 
 ![Metric dashboard](assets/readme/metric_dashboard.png)
+
+### Trajectory Overview
+
+![Trajectory overview](assets/readme/trajectory_overview.png)
 
 ## Experiment Highlights
 
