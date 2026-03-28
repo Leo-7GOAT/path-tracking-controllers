@@ -6,7 +6,7 @@ Comparative benchmark and visualization project for classical vehicle path-track
 
 ## At a Glance
 
-- `5` 类控制器：`Stanley / Pure Pursuit / PID / LQR / MPC-style`
+- `5` 类控制器：`Stanley / Pure Pursuit / PID / LQR / MPC`
 - `3` 类任务：`Straight / Curved / CircleLoop`
 - 支持实时弹窗、多车同图演示、量化评测、自动出图出表
 - 适合作为自动驾驶控制/规控岗位的项目展示与面试讲解材料
@@ -17,14 +17,14 @@ Comparative benchmark and visualization project for classical vehicle path-track
 - `Pure Pursuit`
 - `PID`
 - `LQR`
-- `MPC-style`
+- `MPC`
 
 项目使用统一的运动学自行车模型、统一的仿真时钟、统一的终点判定和统一的评测指标，对不同控制器在多种轨迹任务上的跟踪精度、完成时间和控制平滑性进行量化对比。
 
 ## Highlights
 
 - 统一 benchmark 框架：同一套车辆模型、终点逻辑和指标统计，便于公平对比。
-- 支持 5 种控制器：`Stanley / Pure Pursuit / PID / LQR / MPC-style`。
+- 支持 5 种控制器：`Stanley / Pure Pursuit / PID / LQR / MPC`。
 - 支持 3 类任务：`Straight`、高曲率 `Curved`、整圈闭环 `CircleLoop`。
 - 综合脚本默认实时弹窗演示，并让多辆车在同一张图里一起跑。
 - 支持每个控制器独立脚本运行，也支持综合 benchmark 一键出图出表。
@@ -55,7 +55,7 @@ Comparative benchmark and visualization project for classical vehicle path-track
 - `Pure Pursuit`：基于前视点的经典几何路径跟踪方法。
 - `PID`：使用速度 PID 和横向误差 PID 的基线方法。
 - `LQR`：基于线性二次型调节器的状态反馈控制方法。
-- `MPC-style`：有限时域预测控制风格的控制器，用于兼顾精度与平滑性。
+- `MPC`：基于有限时域在线优化的模型预测控制器，用于兼顾精度与输入平滑性。
 
 ## Scenarios
 
@@ -125,19 +125,19 @@ python MPC.py --no-live
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | Straight | Stanley | Yes | 0.000 | 0.000 | 0.000 | 12.70 | 0.985 | 0.000 | 0.000 |
 | Straight | PurePursuit | Yes | 0.000 | 0.000 | 0.000 | 12.60 | 0.981 | 0.000 | 0.000 |
-| Straight | PID | Yes | 0.178 | 0.649 | 0.280 | 12.70 | 0.987 | 0.257 | 5.155 |
+| Straight | PID | Yes | 0.000 | 0.000 | 0.000 | 12.70 | 0.989 | 0.000 | 0.000 |
 | Straight | LQR | Yes | 0.000 | 0.000 | 0.000 | 12.60 | 0.985 | 0.000 | 0.000 |
 | Straight | MPC | Yes | 0.000 | 0.000 | 0.000 | 12.60 | 0.985 | 0.000 | 0.000 |
-| Curved | Stanley | Yes | 0.221 | 2.771 | 0.547 | 25.00 | 0.491 | 0.137 | 0.175 |
-| Curved | PurePursuit | Yes | 0.282 | 3.881 | 0.776 | 25.60 | 0.471 | 0.136 | 0.169 |
-| Curved | PID | Yes | 0.407 | 3.562 | 0.726 | 25.30 | 0.484 | 0.479 | 8.149 |
-| Curved | LQR | Yes | 0.346 | 4.113 | 0.824 | 25.80 | 0.467 | 0.431 | 7.329 |
-| Curved | MPC | Yes | 0.260 | 3.886 | 0.765 | 25.60 | 0.470 | 0.137 | 0.616 |
-| CircleLoop | Stanley | Yes | 0.118 | 0.148 | 0.121 | 23.00 | 0.269 | 0.161 | 0.214 |
-| CircleLoop | PurePursuit | Yes | 0.039 | 0.080 | 0.042 | 23.20 | 0.267 | 0.149 | 0.081 |
-| CircleLoop | PID | Yes | 0.055 | 0.227 | 0.069 | 23.10 | 0.270 | 0.463 | 8.693 |
-| CircleLoop | LQR | Yes | 0.045 | 0.081 | 0.048 | 23.10 | 0.271 | 0.296 | 5.286 |
-| CircleLoop | MPC | Yes | 0.047 | 0.066 | 0.049 | 23.10 | 0.270 | 0.148 | 1.474 |
+| Curved | Stanley | Yes | 0.310 | 3.673 | 0.784 | 28.80 | 0.713 | 0.154 | 0.163 |
+| Curved | PurePursuit | Yes | 0.387 | 4.630 | 1.067 | 29.90 | 0.748 | 0.163 | 0.180 |
+| Curved | PID | Yes | 0.354 | 3.302 | 0.707 | 28.40 | 0.698 | 0.170 | 0.320 |
+| Curved | LQR | Yes | 0.338 | 4.413 | 0.980 | 29.60 | 0.722 | 0.163 | 0.217 |
+| Curved | MPC | Yes | 0.346 | 4.432 | 0.988 | 29.60 | 0.722 | 0.162 | 0.203 |
+| CircleLoop | Stanley | Yes | 0.118 | 0.148 | 0.121 | 23.00 | 0.269 | 0.158 | 0.066 |
+| CircleLoop | PurePursuit | Yes | 0.039 | 0.071 | 0.042 | 23.20 | 0.267 | 0.148 | 0.023 |
+| CircleLoop | PID | Yes | 0.195 | 0.222 | 0.201 | 22.80 | 0.274 | 0.161 | 0.615 |
+| CircleLoop | LQR | Yes | 0.047 | 0.066 | 0.050 | 23.10 | 0.271 | 0.148 | 0.256 |
+| CircleLoop | MPC | Yes | 0.049 | 0.068 | 0.052 | 23.10 | 0.270 | 0.148 | 0.157 |
 
 ## Experiment Analysis
 
@@ -150,21 +150,22 @@ python MPC.py --no-live
 
 ### By Scenario
 
-- `Straight`：`Stanley / Pure Pursuit / LQR / MPC` 基本实现零误差跟踪，说明基础模型、路径索引和控制接口工作正常；`PID` 可以完成任务，但横向控制仍存在一定抖动。
-- `Curved`：`Stanley` 在当前参数下 RMSE 最低，说明其在高曲率几何路径跟踪上的表现较强；`MPC-style` 的平均转向变化率明显更低，说明它在复杂场景下更容易兼顾精度和控制平滑性。
-- `CircleLoop`：`Pure Pursuit` 的 RMSE 最低，说明前视策略在闭环连续曲率任务里非常有效；`MPC-style` 和 `LQR` 也保持了较低误差，表现稳定。
+- `Straight`：5 种控制器都能稳定完成近零误差跟踪，说明统一建模、路径索引和控制接口已经正确闭环。
+- `Curved`：这是最能拉开差异的场景。`PID` 在当前参数下取得了最低 RMSE，但转向变化率最高；`MPC` 和 `LQR` 虽然误差略大，但控制输入更平滑，体现了精度与平滑性的典型 trade-off。
+- `CircleLoop`：`Pure Pursuit` 的 RMSE 最低，说明前视策略在闭环连续曲率任务里非常有效；`MPC`、`LQR` 和 `Stanley` 也保持了较低误差和较稳的闭环表现。
 
 ### By Controller
 
 - `Stanley`：在几何路径跟踪任务中整体表现稳定，尤其适合曲率变化明显的路径。
 - `Pure Pursuit`：实现简单、效果直观，在闭环和连续曲率任务里很有代表性。
-- `PID`：适合作为 baseline，但在复杂场景下更容易出现较大的转向振荡。
+- `PID`：适合作为 baseline。在高曲率任务里可以通过调参取得较低误差，但通常会伴随更激进的转向变化。
 - `LQR`：具备较强的经典控制解释性，适合做状态反馈方法对照。
-- `MPC-style`：虽然 RMSE 不一定始终最低，但通常能在精度和控制平滑性之间取得较好平衡。
+- `MPC`：基于在线有限时域优化，虽然 RMSE 不一定始终最低，但通常能在精度和控制平滑性之间取得更稳妥的平衡。
 
 ### Engineering Notes
 
-- 当前终点减速逻辑使用统一速度收敛和柔性制动策略，避免了早期版本中“接近终点时速度来回震荡”的问题。
+- 当前框架加入了曲率感知速度规划、统一速度收敛和柔性制动策略，避免了早期版本中“接近终点时速度来回震荡”的问题。
+- 当前车辆模型加入了转向角速率限制和一阶执行器动态，使不同控制器的对比更接近真实执行器条件。
 - 综合脚本与单控制器脚本都支持覆盖旧结果重新生成，便于反复调参和稳定展示。
 
 ## File Guide
@@ -177,12 +178,11 @@ python MPC.py --no-live
 | `PurePursuit.py` | `Pure Pursuit` 控制器实现与独立运行入口。 |
 | `PID.py` | 纯 PID 基线控制器实现与独立运行入口。 |
 | `LQR.py` | LQR 路径跟踪控制器实现与独立运行入口。 |
-| `MPC.py` | MPC-style 控制器实现与独立运行入口。 |
+| `MPC.py` | 线性 MPC 控制器实现与独立运行入口。 |
 | `common.py` | 公共数据结构、车辆模型、PID 工具、仿真配置定义。 |
 | `cubic_spline.py` | 样条路径生成模块，用于构造参考轨迹。 |
 | `draw.py` | 小车可视化绘制工具，用于静态图和动画展示。 |
 | `requirements.txt` | 项目依赖说明。 |
-| `resume_project_summary.md` | 面向简历投递的项目描述素材。 |
 | `assets/readme/` | README 首页展示图片，适合直接同步到 GitHub。 |
 | `outputs/` | benchmark 运行输出目录，存放表格、分析图和动画。 |
 
@@ -214,7 +214,7 @@ python MPC.py --no-live
 
 如果你想把这个项目写进简历，可以概括成：
 
-> 搭建了一个自包含的轨迹跟踪控制 benchmark，统一实现并评测 Stanley、Pure Pursuit、PID、LQR 和 MPC-style 5 类控制器，在直线、高曲率曲线和整圈闭环任务上对横向误差、完成时间和控制平滑性进行量化对比，并完成实时演示、结果图表自动生成和独立脚本封装。
+> 搭建了一个自包含的轨迹跟踪控制 benchmark，统一实现并评测 Stanley、Pure Pursuit、PID、LQR 和 MPC 5 类控制器，在直线、高曲率曲线和整圈闭环任务上对横向误差、完成时间和控制平滑性进行量化对比，并完成实时演示、结果图表自动生成和独立脚本封装。
 
 ## Notes
 

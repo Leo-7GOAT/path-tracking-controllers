@@ -91,6 +91,18 @@ def _stop_speed_limit(distance_to_goal, stop_distance, comfortable_brake, stop_b
     return math.sqrt(max(0.0, 2.0 * comfortable_brake * usable_distance))
 
 
+def _curvature_speed_limit(path, center_index, sim_config):
+    if path.length == 0:
+        return sim_config.target_speed
+
+    end_index = min(path.length, center_index + max(1, sim_config.curvature_preview_points))
+    preview_curvature = float(np.max(np.abs(path.ck[center_index:end_index])))
+    if preview_curvature < 1e-4:
+        return sim_config.target_speed
+
+    return math.sqrt(sim_config.max_lateral_accel / preview_curvature)
+
+
 def build_speed_profile(length, cruise_speed, decel_points=35):
     profile = np.full(length, cruise_speed, dtype=float)
     decel_points = min(decel_points, max(1, length))
@@ -361,11 +373,19 @@ def run_benchmark(controller_name, controller_cls, scenario, sim_config, vehicle
                 _stop_speed_limit(remaining_distance, stop_distance, sim_config.comfortable_brake),
                 _stop_speed_limit(preview_goal_distance, stop_distance, sim_config.comfortable_brake),
             )
-            raw_target_speed = min(float(scenario.speed_profile[speed_index]), distance_limited_speed)
+            curvature_limited_speed = _curvature_speed_limit(scenario.path, speed_index, sim_config)
+            raw_target_speed = min(
+                float(scenario.speed_profile[speed_index]),
+                distance_limited_speed,
+                curvature_limited_speed,
+            )
             if preview_goal_distance <= stop_distance * 1.15 and state.v <= max(sim_config.stop_speed * 1.5, 0.45):
                 raw_target_speed = 0.0
         else:
-            raw_target_speed = float(scenario.speed_profile[speed_index])
+            raw_target_speed = min(
+                float(scenario.speed_profile[speed_index]),
+                _curvature_speed_limit(scenario.path, speed_index, sim_config),
+            )
 
         max_speed_delta = sim_config.target_speed_slew_rate * sim_config.dt
         if raw_target_speed > target_speed_cmd:
@@ -405,7 +425,7 @@ def run_benchmark(controller_name, controller_cls, scenario, sim_config, vehicle
         record.speed.append(state.v)
         record.target_speed.append(target_speed)
         record.accel.append(accel)
-        record.steer.append(steer)
+        record.steer.append(state.steer)
         record.lateral_error.append(lateral_error)
         record.heading_error.append(heading_error)
         record.target_index.append(index)

@@ -65,7 +65,8 @@ class LQRPathTrackingController:
             [[lateral_error], [lateral_rate], [heading_error], [heading_rate]],
             dtype=float,
         )
-        A, B = self._discrete_model(state.v)
+        model_speed = max(abs(state.v), abs(target_speed), 2.0)
+        A, B = self._discrete_model(model_speed)
         P = self._solve_dare(A, B)
         K = np.linalg.solve(self.R + B.T.dot(P).dot(B), B.T.dot(P).dot(A))
 

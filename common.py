@@ -68,6 +68,8 @@ class PID1D:
 class VehicleConfig:
     wheel_base: float = 2.7
     max_steer: float = math.radians(35.0)
+    max_steer_rate: float = math.radians(85.0)
+    steer_time_constant: float = 0.28
     max_accel: float = 2.5
     max_speed: float = 16.0
     min_speed: float = 0.0
@@ -83,11 +85,13 @@ class SimulationConfig:
     dt: float = 0.1
     max_time: float = 45.0
     target_speed: float = 8.0
+    max_lateral_accel: float = 2.25
     stop_distance: float = 1.0
     stop_speed: float = 0.5
     search_window: int = 80
     target_speed_slew_rate: float = 2.2
     comfortable_brake: float = 1.1
+    curvature_preview_points: int = 10
 
 
 @dataclass
@@ -102,13 +106,18 @@ class VehicleState:
         steer = clamp(steer, -vehicle_config.max_steer, vehicle_config.max_steer)
         accel = clamp(accel, -vehicle_config.max_accel, vehicle_config.max_accel)
 
+        steer_error = steer - self.steer
+        lag_delta = steer_error * dt / max(vehicle_config.steer_time_constant, dt)
+        max_steer_delta = vehicle_config.max_steer_rate * dt
+        steer_delta = clamp(lag_delta, -max_steer_delta, max_steer_delta)
+        self.steer = clamp(self.steer + steer_delta, -vehicle_config.max_steer, vehicle_config.max_steer)
+
         self.x += self.v * math.cos(self.yaw) * dt
         self.y += self.v * math.sin(self.yaw) * dt
         self.yaw = normalize_angle(
-            self.yaw + self.v / vehicle_config.wheel_base * math.tan(steer) * dt
+            self.yaw + self.v / vehicle_config.wheel_base * math.tan(self.steer) * dt
         )
         self.v = clamp(self.v + accel * dt, vehicle_config.min_speed, vehicle_config.max_speed)
-        self.steer = steer
 
 
 class ReferencePath:

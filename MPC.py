@@ -12,11 +12,11 @@ class MPCController:
     def __init__(self, dt=0.1, vehicle_config=None):
         self.dt = dt
         self.vehicle_config = vehicle_config
-        self.horizon = 12
-        self.Q = np.diag([4.5, 0.35, 3.5, 0.25])
-        self.Qf = np.diag([8.0, 0.6, 6.5, 0.4])
-        self.R_input = 0.35
-        self.R_rate = np.diag([1.25])
+        self.horizon = 16
+        self.Q = np.diag([5.0, 0.45, 4.2, 0.3])
+        self.Qf = np.diag([8.5, 0.8, 7.2, 0.5])
+        self.R_input = 0.45
+        self.R_rate = 1.8
         self.speed_pid = PID1D(
             kp=1.0,
             ki=0.12,
@@ -45,32 +45,54 @@ class MPCController:
         B = np.array([[0.0], [0.0], [0.0], [speed / self.vehicle_config.wheel_base]], dtype=float)
         return A, B
 
-    def _riccati_gains(self, A, B):
-        A_aug = np.block(
-            [
-                [A, B],
-                [np.zeros((1, 4), dtype=float), np.ones((1, 1), dtype=float)],
-            ]
-        )
-        B_aug = np.vstack([B, np.ones((1, 1), dtype=float)])
+    def _build_prediction_matrices(self, A, B):
+        state_dim = A.shape[0]
+        horizon = self.horizon
+        s_x = np.zeros((horizon * state_dim, state_dim), dtype=float)
+        s_u = np.zeros((horizon * state_dim, horizon), dtype=float)
 
-        Q_aug = np.zeros((5, 5), dtype=float)
-        Q_aug[:4, :4] = self.Q
-        Q_aug[4, 4] = self.R_input
+        a_powers = [np.eye(state_dim, dtype=float)]
+        for _ in range(horizon):
+            a_powers.append(a_powers[-1].dot(A))
 
-        Qf_aug = np.zeros((5, 5), dtype=float)
-        Qf_aug[:4, :4] = self.Qf
-        Qf_aug[4, 4] = self.R_input
+        for step in range(horizon):
+            row = slice(step * state_dim, (step + 1) * state_dim)
+            s_x[row, :] = a_powers[step + 1]
+            for control_step in range(step + 1):
+                col = slice(control_step, control_step + 1)
+                s_u[row, col] = a_powers[step - control_step].dot(B)
 
-        gains = []
-        P = Qf_aug.copy()
-        for _ in range(self.horizon):
-            S = self.R_rate + B_aug.T.dot(P).dot(B_aug)
-            K = np.linalg.solve(S, B_aug.T.dot(P).dot(A_aug))
-            gains.append(K)
-            P = Q_aug + A_aug.T.dot(P).dot(A_aug - B_aug.dot(K))
-        gains.reverse()
-        return gains
+        return s_x, s_u
+
+    def _difference_operator(self):
+        diff = np.eye(self.horizon, dtype=float)
+        for i in range(1, self.horizon):
+            diff[i, i - 1] = -1.0
+        return diff
+
+    def _solve_mpc(self, A, B, state_vector):
+        s_x, s_u = self._build_prediction_matrices(A, B)
+        q_bar = np.zeros((self.horizon * 4, self.horizon * 4), dtype=float)
+        for i in range(self.horizon - 1):
+            row = slice(i * 4, (i + 1) * 4)
+            q_bar[row, row] = self.Q
+        q_bar[-4:, -4:] = self.Qf
+
+        r_bar = self.R_input * np.eye(self.horizon, dtype=float)
+        diff = self._difference_operator()
+        prev_input = np.zeros((self.horizon, 1), dtype=float)
+        prev_input[0, 0] = self.prev_feedback_steer
+
+        hessian = s_u.T.dot(q_bar).dot(s_u) + r_bar + self.R_rate * diff.T.dot(diff)
+        gradient = s_u.T.dot(q_bar).dot(s_x).dot(state_vector) - self.R_rate * diff.T.dot(prev_input)
+        regularization = 1e-6 * np.eye(self.horizon, dtype=float)
+
+        try:
+            control_sequence = -np.linalg.solve(hessian + regularization, gradient)
+        except np.linalg.LinAlgError:
+            control_sequence = -np.linalg.lstsq(hessian + regularization, gradient, rcond=None)[0]
+
+        return control_sequence.flatten()
 
     def control(self, state, ref_path, target_speed):
         index, lateral_error, heading_error, curvature = ref_path.tracking_error(
@@ -80,33 +102,26 @@ class MPCController:
         lateral_rate = (lateral_error - self.prev_lateral_error) / self.dt
         heading_rate = normalize_angle(heading_error - self.prev_heading_error) / self.dt
 
-        A, B = self._discrete_model(state.v)
-        gains = self._riccati_gains(A, B)
-
-        augmented_state = np.array(
-            [
-                [lateral_error],
-                [lateral_rate],
-                [heading_error],
-                [heading_rate],
-                [self.prev_feedback_steer],
-            ],
+        model_speed = max(abs(state.v), abs(target_speed), 2.0)
+        A, B = self._discrete_model(model_speed)
+        state_vector = np.array(
+            [[lateral_error], [lateral_rate], [heading_error], [heading_rate]],
             dtype=float,
         )
-        delta_feedback = self.prev_feedback_steer - float(gains[0].dot(augmented_state))
-        delta_feedback = clamp(
-            delta_feedback,
+        control_sequence = self._solve_mpc(A, B, state_vector)
+        feedback_steer = clamp(
+            float(control_sequence[0]),
             -0.9 * self.vehicle_config.max_steer,
             0.9 * self.vehicle_config.max_steer,
         )
 
-        delta_feedforward = math.atan(self.vehicle_config.wheel_base * curvature)
-        steer = delta_feedforward + delta_feedback
+        feedforward_steer = math.atan(self.vehicle_config.wheel_base * curvature)
+        steer = feedforward_steer + feedback_steer
         accel = self.speed_pid.step(target_speed - state.v, self.dt)
 
         self.prev_lateral_error = lateral_error
         self.prev_heading_error = heading_error
-        self.prev_feedback_steer = delta_feedback
+        self.prev_feedback_steer = feedback_steer
 
         return (
             clamp(accel, -self.vehicle_config.max_accel, self.vehicle_config.max_accel),
